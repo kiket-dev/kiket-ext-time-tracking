@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: time_entries_daily
+    description: Daily aggregated time entries by user and issue
+    columns:
+      - name: day_user_issue
+        description: Unique key for incremental updates
+        tests:
+          - unique
+          - not_null
+      - name: entry_date
+        description: Date of the entries
+      - name: user_id
+        description: User ID
+      - name: issue_id
+        description: Issue ID
+      - name: total_hours
+        description: Total hours logged
+      - name: billable_hours
+        description: Billable hours logged
+
+  - name: user_time_summary
+    description: Per-user time tracking summary statistics
+    columns:
+      - name: user_id
+        description: User ID
+        tests:
+          - unique
+          - not_null
+      - name: total_hours
+        description: Total hours logged by user
+      - name: billable_percentage
+        description: Percentage of time that is billable
+
+  - name: issue_time_summary
+    description: Per-issue time tracking summary statistics
+    columns:
+      - name: issue_id
+        description: Issue ID
+        tests:
+          - unique
+          - not_null
+      - name: total_hours
+        description: Total hours logged on issue
+      - name: contributors
+        description: Number of unique users who logged time

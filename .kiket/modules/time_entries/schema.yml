@@ -1,0 +1,139 @@
+# Custom data schema for time tracking extension
+# This defines the database tables managed by this extension
+
+model_version: "1.0"
+
+tables:
+  time_entries:
+    description: Time entries tracked against issues
+    columns:
+      - name: id
+        type: bigint
+        primary_key: true
+        auto_increment: true
+      - name: user_id
+        type: string
+        null: false
+        indexed: true
+        description: User who logged the time
+      - name: issue_id
+        type: string
+        null: false
+        indexed: true
+        description: Issue the time was logged against
+      - name: started_at
+        type: timestamp
+        null: false
+        indexed: true
+        description: When the time entry started
+      - name: ended_at
+        type: timestamp
+        null: false
+        description: When the time entry ended
+      - name: duration_seconds
+        type: integer
+        null: false
+        description: Duration in seconds
+      - name: duration_hours
+        type: decimal
+        precision: 10
+        scale: 2
+        null: false
+        description: Duration in hours (calculated)
+      - name: description
+        type: text
+        null: true
+        description: Optional description of work performed
+      - name: tags
+        type: json
+        null: true
+        description: Tags associated with this entry
+      - name: billable
+        type: boolean
+        null: false
+        default: true
+        description: Whether this time is billable
+      - name: created_at
+        type: timestamp
+        null: false
+        default: now()
+      - name: updated_at
+        type: timestamp
+        null: false
+        default: now()
+
+    indexes:
+      - name: idx_time_entries_user_started
+        columns: [user_id, started_at]
+        description: Optimize user time entry lookups
+      - name: idx_time_entries_issue_started
+        columns: [issue_id, started_at]
+        description: Optimize issue time entry lookups
+      - name: idx_time_entries_billable
+        columns: [billable, started_at]
+        description: Optimize billable time queries
+
+  active_timers:
+    description: Currently running timers
+    columns:
+      - name: id
+        type: bigint
+        primary_key: true
+        auto_increment: true
+      - name: user_id
+        type: string
+        null: false
+        unique: true
+        description: User running the timer (one per user)
+      - name: issue_id
+        type: string
+        null: false
+        description: Issue being tracked
+      - name: started_at
+        type: timestamp
+        null: false
+        description: When the timer started
+      - name: description
+        type: text
+        null: true
+        description: Optional description
+      - name: tags
+        type: json
+        null: true
+        description: Tags for this timer
+      - name: created_at
+        type: timestamp
+        null: false
+        default: now()
+
+permissions:
+  - role: user
+    tables:
+      - time_entries
+      - active_timers
+    operations:
+      - read
+      - write
+      - delete
+    conditions:
+      - column: user_id
+        equals: current_user_id
+
+  - role: manager
+    tables:
+      - time_entries
+      - active_timers
+    operations:
+      - read
+      - write
+    conditions: []
+
+  - role: admin
+    tables:
+      - time_entries
+      - active_timers
+    operations:
+      - read
+      - write
+      - delete
+    conditions: []

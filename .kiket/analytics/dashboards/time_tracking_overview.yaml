@@ -1,0 +1,140 @@
+manifestVersion: "1.0"
+dashboard:
+  id: time-tracking-overview
+  name: Time Tracking Overview
+  description: Overview of time tracking metrics and summaries
+  refresh_interval: 300  # 5 minutes
+
+  sections:
+    - name: Summary Metrics
+      layout: grid
+      columns: 4
+      widgets:
+        - type: metric
+          title: Total Hours (Last 30 Days)
+          query: |
+            select sum(duration_hours) as value
+            from time_entries
+            where started_at >= current_date - interval '30 days'
+          format: number
+          decimals: 1
+          suffix: " hrs"
+
+        - type: metric
+          title: Billable Hours (Last 30 Days)
+          query: |
+            select sum(duration_hours) as value
+            from time_entries
+            where billable = true
+              and started_at >= current_date - interval '30 days'
+          format: number
+          decimals: 1
+          suffix: " hrs"
+          color: success
+
+        - type: metric
+          title: Active Timers
+          query: |
+            select count(*) as value
+            from active_timers
+          format: number
+          color: primary
+
+        - type: metric
+          title: Billable Rate
+          query: |
+            select round(100.0 * sum(case when billable then duration_hours else 0 end) / nullif(sum(duration_hours), 0), 1) as value
+            from time_entries
+            where started_at >= current_date - interval '30 days'
+          format: number
+          decimals: 1
+          suffix: "%"
+
+    - name: Time Trends
+      layout: full_width
+      widgets:
+        - type: line_chart
+          title: Daily Hours Logged
+          query: |
+            select
+              entry_date as date,
+              sum(total_hours) as total_hours,
+              sum(billable_hours) as billable_hours
+            from time_entries_daily
+            where entry_date >= current_date - interval '30 days'
+            group by 1
+            order by 1
+          x_axis: date
+          y_axes:
+            - column: total_hours
+              label: Total Hours
+              color: "#4299E1"
+            - column: billable_hours
+              label: Billable Hours
+              color: "#48BB78"
+
+    - name: Top Contributors
+      layout: half_width
+      widgets:
+        - type: bar_chart
+          title: Top 10 Users by Hours
+          query: |
+            select
+              user_id,
+              total_hours
+            from user_time_summary
+            order by total_hours desc
+            limit 10
+          x_axis: user_id
+          y_axis: total_hours
+          orientation: horizontal
+
+    - name: Top Issues
+      layout: half_width
+      widgets:
+        - type: bar_chart
+          title: Top 10 Issues by Hours
+          query: |
+            select
+              issue_id,
+              total_hours
+            from issue_time_summary
+            order by total_hours desc
+            limit 10
+          x_axis: issue_id
+          y_axis: total_hours
+          orientation: horizontal
+
+    - name: Recent Entries
+      layout: full_width
+      widgets:
+        - type: table
+          title: Last 20 Time Entries
+          query: |
+            select
+              user_id,
+              issue_id,
+              started_at,
+              duration_hours,
+              billable,
+              description
+            from time_entries
+            order by started_at desc
+            limit 20
+          columns:
+            - name: user_id
+              label: User
+            - name: issue_id
+              label: Issue
+            - name: started_at
+              label: Started
+              format: datetime
+            - name: duration_hours
+              label: Hours
+              format: number
+              decimals: 2
+            - name: billable
+              label: Billable
+              format: boolean
+            - name: description
+              label: Description

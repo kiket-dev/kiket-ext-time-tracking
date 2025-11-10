@@ -1,0 +1,113 @@
+model_version: "1.0"
+extension:
+  id: dev.kiket.ext.time-tracking
+  name: Time Tracking
+  version: 1.0.0
+  description: Track time spent on issues with timer widget, workflow hooks, and comprehensive reporting
+  author: Kiket Team
+  homepage: https://github.com/kiket-dev/kiket-ext-time-tracking
+  delivery: http
+  callback:
+    url: ${EXTENSION_BASE_URL}
+    secret: env:KIKET_WEBHOOK_SECRET
+    timeout: 30000
+    required: true
+  activationEvents:
+    - issue.transitioned
+  permissions:
+    - issues:read
+    - users:read
+    - custom_data:read
+    - custom_data:write
+  capabilities:
+    - time-tracking
+    - timer-widget
+    - reporting
+    - analytics
+    - export
+  hooks:
+    - event: issue.transitioned
+      timeout: 5000
+      retries: 1
+      description: Auto-stop timers when issues are closed
+  contributes:
+    commands:
+      - command: time.startTimer
+        title: Start Time Timer
+        description: Start tracking time on the current issue
+        category: Time Tracking
+        icon: bi-play-circle
+        keywords: ["time", "timer", "start", "track"]
+        handler:
+          type: extension_event
+          event: time.startTimer
+      - command: time.stopTimer
+        title: Stop Timer
+        description: Stop the active time timer
+        category: Time Tracking
+        icon: bi-stop-circle
+        keywords: ["time", "timer", "stop"]
+        handler:
+          type: extension_event
+          event: time.stopTimer
+      - command: time.viewReport
+        title: View Time Report
+        description: View time tracking summary and analytics
+        category: Time Tracking
+        icon: bi-graph-up
+        keywords: ["time", "report", "analytics", "summary"]
+        handler:
+          type: extension_event
+          event: time.viewReport
+      - command: time.exportCSV
+        title: Export Time Entries
+        description: Export time entries to CSV
+        category: Time Tracking
+        icon: bi-download
+        keywords: ["time", "export", "csv", "download"]
+        handler:
+          type: extension_event
+          event: time.exportCSV
+      - command: time.logManual
+        title: Log Time Manually
+        description: Create a manual time entry
+        category: Time Tracking
+        icon: bi-clock-history
+        keywords: ["time", "log", "manual", "entry"]
+        handler:
+          type: extension_event
+          event: time.logManual
+  configuration:
+    AUTO_STOP_ON_CLOSE:
+      type: boolean
+      default: "true"
+      description: Automatically stop timers when issues are closed
+    DEFAULT_BILLABLE:
+      type: boolean
+      default: "true"
+      description: Default billable status for new entries
+  custom_data:
+    permissions:
+      - module: dev.kiket.ext.time-tracking.time_entries
+        operations: [read, write, delete]
+  assets:
+    icon: ./public/icon.svg
+
+deployment:
+  runtime: cloud_run
+  region: ${KIKET_REGION:-europe-west1}
+  image: ${TIME_TRACKING_IMAGE:-europe-west1-docker.pkg.dev/kiket-471917/kiket-extensions/kiket-ext-time-tracking:latest}
+  resources:
+    cpu: "1"
+    memory: "512Mi"
+    concurrency: 10
+  min_instances: 0
+  max_instances: 10
+  vpc:
+    connector: ${KIKET_VPC_CONNECTOR}
+    egress: all-traffic
+  secret_keys:
+    - KIKET_WEBHOOK_SECRET
+  env:
+    RACK_ENV: production
+    PORT: "9393"

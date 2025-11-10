@@ -1,0 +1,49 @@
+version: 2
+
+sources:
+  - name: time_tracking
+    description: Time tracking extension custom data
+    tables:
+      - name: time_entries
+        description: All time entries logged by users
+        columns:
+          - name: id
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+          - name: user_id
+            description: User who logged the time
+            tests:
+              - not_null
+          - name: issue_id
+            description: Issue the time was logged against
+            tests:
+              - not_null
+          - name: started_at
+            description: Start timestamp
+            tests:
+              - not_null
+          - name: ended_at
+            description: End timestamp
+            tests:
+              - not_null
+          - name: duration_seconds
+            description: Duration in seconds
+            tests:
+              - not_null
+          - name: billable
+            description: Billable flag
+            tests:
+              - not_null
+
+      - name: active_timers
+        description: Currently running timers
+        columns:
+          - name: id
+            description: Primary key
+          - name: user_id
+            description: User running the timer
+            tests:
+              - unique
+              - not_null
