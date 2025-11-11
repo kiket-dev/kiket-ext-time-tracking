@@ -472,7 +472,7 @@ class TimeTrackingExtension < Sinatra::Base
 
     # Generate CSV
     CSV.generate do |csv|
-      csv << ["ID", "User ID", "Issue ID", "Started At", "Ended At", "Duration (hours)", "Description", "Tags", "Billable", "Created At"]
+      csv << [ "ID", "User ID", "Issue ID", "Started At", "Ended At", "Duration (hours)", "Description", "Tags", "Billable", "Created At" ]
 
       entries.each do |entry|
         csv << [
@@ -520,7 +520,7 @@ class TimeTrackingExtension < Sinatra::Base
               duration_seconds: duration_seconds,
               duration_hours: (duration_seconds / 3600.0).round(2),
               description: timer[:description] || "Auto-stopped on issue closure",
-              tags: (timer[:tags] || []) + ["auto-stopped"],
+              tags: (timer[:tags] || []) + [ "auto-stopped" ],
               billable: true,
               created_at: Time.now.utc
             }

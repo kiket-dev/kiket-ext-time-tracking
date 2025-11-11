@@ -315,7 +315,7 @@ RSpec.describe TimeTrackingExtension do
         started_at: "2025-11-10T10:00:00Z",
         duration_seconds: 3600,
         billable: true,
-        tags: ["development"]
+        tags: [ "development" ]
       }), { "CONTENT_TYPE" => "application/json" }
 
       post "/entries", JSON.generate({
@@ -324,7 +324,7 @@ RSpec.describe TimeTrackingExtension do
         started_at: "2025-11-11T10:00:00Z",
         duration_seconds: 7200,
         billable: false,
-        tags: ["meeting"]
+        tags: [ "meeting" ]
       }), { "CONTENT_TYPE" => "application/json" }
     end
 
