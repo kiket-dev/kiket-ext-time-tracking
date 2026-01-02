@@ -1,0 +1,29 @@
+title: Automatic Time Tracking
+description: Start and stop timers based on issue transitions
+
+automations:
+  - name: start_timer_on_progress
+    trigger:
+      event: issue.transitioned
+      conditions:
+        - field: transition.to
+          operator: eq
+          value: "in_progress"
+    actions:
+      - extension: dev.kiket.ext.time-tracking
+        command: time.startTimer
+        params:
+          issue_id: "{{ issue.id }}"
+
+  - name: stop_timer_on_review
+    trigger:
+      event: issue.transitioned
+      conditions:
+        - field: transition.to
+          operator: in
+          value: ["review", "done"]
+    actions:
+      - extension: dev.kiket.ext.time-tracking
+        command: time.stopTimer
+        params:
+          issue_id: "{{ issue.id }}"
