@@ -1,6 +1,7 @@
 # Custom data schema for time tracking extension
 # This defines the database tables managed by this extension
 
+module: dev.kiket.ext.time-tracking.entries
 model_version: "1.0"
 
 tables:

@@ -9,7 +9,7 @@ extension:
   delivery: http
   callback:
     url: ${EXTENSION_BASE_URL}
-    secret: env:KIKET_WEBHOOK_SECRET
+    secret: env.KIKET_WEBHOOK_SECRET
     timeout: 30000
     required: true
   activationEvents:
@@ -88,7 +88,7 @@ extension:
       description: Default billable status for new entries
   custom_data:
     permissions:
-      - module: dev.kiket.ext.time-tracking.time_entries
+      - module: dev.kiket.ext.time-tracking.entries
         operations: [read, write, delete]
   assets:
     icon: ./public/icon.svg
